@@ -76,7 +76,49 @@ contour                    NodePort   10.107.138.251   <none>        80:30080/TC
 ## Deploy Some Examples
 Contour supports the basic Ingress resource type as well as a CustomResourceDefinition type IngressRoute.  Below is just some basic examples, but I encourage you to look into the IngressRoute type.  It provides some neat features like weighted service traffic.
 
+## Deploy a Service
+First thing we will need is a service that our ingress traffic can connect.  Simplest way is just to create a deployment of nginx and then expose it using a Kubernetes Service resource.
+```console
+$ kubectl run --image=nginx web-dep
+kubectl run --generator=deployment/apps.v1 is DEPRECATED and will be removed in a future version. Use kubectl run --gene
+rator=run-pod/v1 or kubectl create instead.
+deployment.apps/web-dep created
+```
+Don't worry about the warning message.  The deployment did get deployed.  
+Next, expose the service for the deployment.
+```console
+$ kubectl expose deployment web-dep --port=80
+service/web-dep exposed
+```
+That will create a service of type ClusterIP which is fine for our examples.  
 
+## Ingress
+Now we want to create a Kubernetes resource called an Ingress.  The example below is a simple example that routes traffic to our nginx web service.  
+```console
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ing1
+  annotations:
+    kubernetes.io/ingress.class: contour
 
-
+spec:
+  rules:
+  - host: s1.cluster1.corp.local
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-dep
+          servicePort: 80
+```
+Save that YAML to a file and apply it to your cluster and then execute the below curl command.
+```console
+$ curl -v -H 'Host: s1.cluster1.corp.local' worker1:30080
+```
+Few items to point out with the Ingress resource and curl command.
+* host is nothing more than something I made up since it is on my local system and I update the header when I make the actual curl call.  This makes it easy for testing.
+* Worker1 is one of the nodes in my Kubernetes cluster.
+* Path is to the root of the host; "/"
+* Backend is the service that we exposed above.
 
