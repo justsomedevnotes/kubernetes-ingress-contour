@@ -4,13 +4,13 @@ This blog covers deploying the Contour ingress controller and demonstrates its u
 ## Deploy Contour
 There are a few different methods for deploying Contour, but I like to just clone the github repository and deploy from the YAMLs provided.
 ```console
-git clone https://github.com/heptio/contour.git
+$ git clone https://github.com/heptio/contour.git
 ```
 ```console
-cd contour/deployment/deployment-grpc-v2
+$ cd contour/deployment/deployment-grpc-v2
 ```
 ```console
-root@master:/vagrant/contour/deployment/deployment-grpc-v2# ls -1
+$ ls -1
 01-common.yaml
 02-contour.yaml
 02-rbac.yaml
@@ -55,26 +55,26 @@ spec:
 ```
 Now save and apply the resources to your Kubernetes environment.
 ```console
-kubectl apply -f .
+$ kubectl apply -f .
 ```
 
 ## Verify Contour is Running
 The deployment above will create a new heptio-contour namespace with various Kubernetes resources.  One of which should be a service of type NodePort pointing to Contour pods running an instance of the Envoy container.  Make sure the pods are running with 2/2 containers in the ready state.  Given we have a service of type NodePort, you should be able to hit any of the nodes in your cluster to access it.  Note: Contour does not provide any ingress traffic until an Ingress or IngressRoute is actually deployed.
 ```console
-root@master:/vagrant/contour/deployment/deployment-grpc-v2# kubectl get pods -n heptio-contour
+$ kubectl get pods -n heptio-contour
 NAME                       READY   STATUS    RESTARTS   AGE
 contour-66bc464fb5-f4b7b   2/2     Running   2          7d4h
 contour-66bc464fb5-nkwgd   2/2     Running   2          7d4h
 ```
 
 ```console
-root@master:/vagrant/contour/deployment/deployment-grpc-v2# kubectl get svc -n heptio-contour
+$ kubectl get svc -n heptio-contour
 NAME                       TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
 contour                    NodePort   10.107.138.251   <none>        80:30080/TCP,443:30443/TCP   7d4h
 ```
 
 ## Deploy Some Examples
-Contour supports the basic Ingress resource type as well as a CRD type IngressRoute.  Below is just some basic examples, but I encourage you to look into the IngressRoute type.  It provides some neat features like weighted service traffic.
+Contour supports the basic Ingress resource type as well as a CustomResourceDefinition type IngressRoute.  Below is just some basic examples, but I encourage you to look into the IngressRoute type.  It provides some neat features like weighted service traffic.
 
 
 
