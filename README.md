@@ -59,7 +59,7 @@ $ kubectl apply -f .
 ```
 
 ## Verify Contour is Running
-The deployment above will create a new heptio-contour namespace with various Kubernetes resources.  One of which should be a service of type NodePort pointing to Contour pods running an instance of the Envoy container.  Make sure the pods are running with 2/2 containers in the ready state.  Given we have a service of type NodePort, you should be able to hit any of the nodes in your cluster to access it.  Note: Contour does not provide any ingress traffic until an Ingress or IngressRoute is actually deployed.
+The deployment above will create a new heptio-contour namespace with various Kubernetes resources.  One of which should be a service of type NodePort pointing to Contour pods running instances of the Contour container and the Envoy container.  Make sure both containers are in the ready state.  Given we have a service of type NodePort, you should be able to hit any of the nodes in your cluster to access it.  Note: Contour does not provide any ingress traffic until an Ingress or IngressRoute is actually deployed.
 ```console
 $ kubectl get pods -n heptio-contour
 NAME                       READY   STATUS    RESTARTS   AGE
@@ -74,7 +74,7 @@ contour                    NodePort   10.107.138.251   <none>        80:30080/TC
 ```
 
 ## Deploy Some Examples
-Contour supports the basic Ingress resource type as well as a CustomResourceDefinition type IngressRoute.  Below is just some basic examples, but I encourage you to look into the IngressRoute type.  It provides some neat features like weighted service traffic.
+Contour supports the basic Ingress resource type as well as a CustomResourceDefinition type IngressRoute.  Below is just some basic examples, but I encourage you to look into the IngressRoute type.  It provides some cool features like weighted service traffic.
 
 ## Deploy a Service
 First thing we will need is a service that our ingress traffic can connect.  Simplest way is just to create a deployment of nginx and then expose it using a Kubernetes Service resource.
@@ -118,7 +118,7 @@ $ curl -v -H 'Host: s1.cluster1.corp.local' worker1:30080
 ```
 Few items to point out with the Ingress resource and curl command.
 * host is nothing more than something I made up since it is on my local system and I update the header when I make the actual curl call.  This makes it easy for testing.
-* Worker1 is one of the nodes in my Kubernetes cluster.
+* Worker1 is one of the nodes in my Kubernetes cluster and has an entry in /etc/hosts.
 * Path is to the root of the host; "/"
 * Backend is the service that we exposed above.
 
