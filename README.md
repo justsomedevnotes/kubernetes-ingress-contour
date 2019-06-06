@@ -77,18 +77,15 @@ contour                    NodePort   10.107.138.251   <none>        80:30080/TC
 Contour supports the basic Ingress resource type as well as a CustomResourceDefinition type IngressRoute.  Below are some basic examples of each.  I encourage you to look into the IngressRoute type.  It provides some cool features like weighted service traffic.
 
 ### Deploy a Service
-First thing we will need is a service that our ingress traffic can connect.  I am using the term service here in the generic sense like a web-service.  Simplest way is just to create a deployment of nginx and then expose it using a Kubernetes Service resource.
+First thing we will need is a service that our ingress traffic can connect.  I am using the term service here in the generic sense like a web-service.  Simplest way is just to create a pod running the nginx image and then expose it using a Kubernetes Service resource.
 ```console
-$ kubectl run --image=nginx web-dep
-kubectl run --generator=deployment/apps.v1 is DEPRECATED and will be removed in a future version. Use kubectl run --gene
-rator=run-pod/v1 or kubectl create instead.
-deployment.apps/web-dep created
+$ kubectl run --generator=run-pod/v1 --image=nginx --labels=run=web web
+pod/web created
 ```
-Don't worry about the warning message.  The deployment should be deployed.  
-Next, expose the Deployment as a Service.
+Next, expose the pod as a Service.
 ```console
-$ kubectl expose deployment web-dep --port=80
-service/web-dep exposed
+$ kubectl expose pod web --port=80
+service/web exposed
 ```
 That will create a Kubernetes Service of type ClusterIP which is fine for our examples.  
 
@@ -109,7 +106,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: web-dep
+          serviceName: web
           servicePort: 80
 ```
 Save the YAML to a file and apply it to your cluster.  Once it is deployed execute the following curl command.
@@ -137,7 +134,7 @@ spec:
     - match: /s1
       prefixRewrite: "/"
       services:
-        - name: web-dep
+        - name: web
           port: 80
 ```
 Save the YAML to a file and apply it to your cluster.  You can check the IngressRoute with the following command.
@@ -155,5 +152,5 @@ Items of note
 * Added the s1 as a subpath.
 
 ## Conclusion
-This blog introduced Heptio Contour.  A Kubernetes IngressController.  It covered deploying Contour and demonstrated two simple examples.  I would encourage you to check out the documentation on Contour's IngresRoute resource https://github.com/heptio/contour/blob/master/docs/ingressroute.md.
+This blog introduced Heptio Contour.  A Kubernetes IngressController.  It covered deploying Contour and demonstrated two simple examples.  I would encourage you to check out the documentation on Contour's IngressRoute resource at https://github.com/heptio/contour/blob/master/docs/ingressroute.md.
 
