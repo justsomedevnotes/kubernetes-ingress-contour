@@ -93,7 +93,7 @@ service/web-dep exposed
 That will create a Kubernetes Service of type ClusterIP which is fine for our examples.  
 
 ### Deploy Ingress Resource
-Now we want to create a Kubernetes resource of type Ingress.  The example below is a simple example that routes traffic to our nginx web service.  
+Now we want to create a Kubernetes resource of type Ingress.  The example below routes traffic to our nginx web service.  
 ```console
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -121,4 +121,39 @@ Few items to point out with the Ingress resource and curl command.
 * Worker1 is one of the nodes in my Kubernetes cluster and has an entry in /etc/hosts.
 * Path is to the root of the host; "/"
 * Backend is the service that we exposed previously.
+
+### Deploy IngressRoute Resource
+This second example uses a CustomResourceDefinition, CRD, to route traffic to our service.  Slight modification to the Ingress example in that this example demonstrates traffic to a subpath, '/s1',  rather than the root path with the s1 as a prefix on the hostname.
+
+```console
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata:
+  name: ingroute1
+spec:
+  virtualhost:
+    fqdn: cluster1.corp.local
+  routes:
+    - match: /s1
+      prefixRewrite: "/"
+      services:
+        - name: web-dep
+          port: 80
+```
+Save the YAML to a file and apply it to your cluster.  You can check the IngressRoute with the following command.
+```console
+$ kubectl get ingressroute
+NAME        FQDN                  TLS SECRET   FIRST ROUTE   STATUS   STATUS DESCRIPTION
+ingroute1   cluster1.corp.local                /s1           valid    valid IngressRoute
+```
+Once it is deployed execute the following curl command.
+```console
+$ curl -v -H 'Host: cluster1.corp.local' worker1:30080/s1
+```
+Items of note
+* changed the host here to cluster1.corp.local which removed the s1 prefix.
+* Added the s1 as a subpath.
+
+## Conclusion
+This blog introduced Heptio Contour.  A Kubernetes IngressController.  It covered deploying Contour and demonstrated two simple examples.  I would encourage you to check out the documentation on Contour's IngresRoute resource https://github.com/heptio/contour/blob/master/docs/ingressroute.md.
 
